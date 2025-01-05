@@ -338,6 +338,65 @@ def remove_first_level_titles(content: str) -> str:
     return modified_content
 
 
+def replace_url_to_card(content: str) -> str:
+    """
+    将文章内容中的带有特定注释的 URL 替换为卡片链接
+    Replace URLs with specific comments in the article content with card links
+
+    特定内容如下：
+    The specific content is as follows:
+    ```
+    <!-- <website-icon-url> -->
+    [<website-title>](<website-url>)
+    ```
+
+    将会转换为：
+    Will be converted to:
+    ```
+    {% externalLinkCard "<website-title>" "<website-url>" "<website-icon-url>" %}
+    ```
+
+    特别地，如果 <website-icon-url> 为如下固定值，将会被替换为相应网站的 logo URL：
+    In particular, if <website-icon-url> is the following fixed value,
+    it will be replaced with the logo URL of the corresponding website:
+    - `知乎` / `zhihu`: `https://pic1.zhimg.com/v2-4cd83ae3d6ca76dabecf001244a62310.jpg?source=57bbeac9`
+    - `github`: `https://github.githubassets.com/assets/apple-touch-icon-144x144-b882e354c005.png`
+    - ...
+
+    Args:
+        content: 文章内容 The content of the article
+
+    Returns:
+        modified_content: 修改后的文章内容 The modified content of the article
+    """
+    # 定义网站图标URL的映射
+    icon_url_mapping = {
+        '知乎': 'https://pic1.zhimg.com/v2-4cd83ae3d6ca76dabecf001244a62310.jpg?source=57bbeac9',
+        'zhihu': 'https://pic1.zhimg.com/v2-4cd83ae3d6ca76dabecf001244a62310.jpg?source=57bbeac9',
+        'github': 'https://github.githubassets.com/assets/apple-touch-icon-144x144-b882e354c005.png'
+    }
+
+    # 正则表达式模式，用于匹配特定格式的注释和链接
+    pattern = re.compile(
+        r'<!--\s([^>]+?)\s-->\n\[(.*?)\]\((.*?)\)',
+        re.DOTALL
+    )
+
+    def replace_with_card(match):
+        icon_url = match.group(1).strip()
+        title = match.group(2).strip()
+        url = match.group(3).strip()
+
+        # 如果 <website-icon-url> 是特定值，则替换为对应的 logo URL
+        if icon_url.lower() in map(str.lower, icon_url_mapping.keys()):
+            icon_url = icon_url_mapping[icon_url.lower()]
+
+        return f'{{% externalLinkCard "{title}" "{url}" "{icon_url}" %}}'
+
+    modified_content = pattern.sub(replace_with_card, content)
+    return modified_content
+
+
 def finalize_all_drafts():
     """
     将所有 _draft 文件夹下的草稿经修改后复制到 source/_posts 目录下
@@ -377,10 +436,12 @@ def finalize_all_drafts():
     文章中需要修改的内容为：
     1. 删除图片插入语句中的 "img/"
     2. 删除文章中的一级标题
+    3. 将附带特殊注释的 URL 替换为卡片链接
 
     The content that needs to be modified in the article is:
     1. remove "img/" in the image insertion statement
     2. remove the first-level title in the article
+    3. replace URLs with special comments with card links
     """
     # 获取所需目录
     source_posts_dir, draft_dir, _, _ = check_get_make_dirs()
@@ -419,8 +480,10 @@ def finalize_all_drafts():
             content = file.read()
         # 使用正则表达式清理图片路径
         content = remove_img_path_in_md(content)
-        # 提取一级标题并添加到 Front-matter 的 title 字段中
+        # 删除一级标题
         content = remove_first_level_titles(content)
+        # 将特殊注释的 URL 替换为卡片链接
+        content = replace_url_to_card(content)
         # 写入修改后的内容到新的位置
         with open(post_md_dest, 'w', encoding='utf-8') as file:
             file.write(content)
