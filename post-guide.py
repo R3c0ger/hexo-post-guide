@@ -274,9 +274,9 @@ def avoid_process_code_blocks(
 
 def remove_img_path_in_md(content: str, img_dir: str = "img/") -> str:
     """
-    使用正则表达式替换形如 [<...>](img/<...>) 的语句，
+    使用正则表达式替换形如 [<...>](img/<...>) 和 <img src="img/<...>" 的语句，
     去掉其中的 `img/`，仅保留文件名。
-    Use regular expressions to replace statements like [<...>](img/<...>),
+    Use regular expressions to replace statements like [<...>](img/<...>) and <img src="img/<...>",
     remove `img/` and keep only the file name.
 
     另外，对于行内代码或代码块中的图片插入语句，不做处理。
@@ -290,15 +290,25 @@ def remove_img_path_in_md(content: str, img_dir: str = "img/") -> str:
     Returns:
         modified_content: 修改后的文章内容 The modified content of the article
     """
+
     def process_non_code(text):
+        # 正则表达式模式：匹配 Markdown 图片链接和 HTML <img> 标签
         img_insert_pattern = rf'\[(.*?)\]\(({img_dir})?([^)]+)\)'
+        html_img_tag_pattern = rf'<img\s+src=["\']{re.escape(img_dir)}([^"\']+)["\']'
 
         def replace_img_path(match):
             # 提取 match 中的组，去掉 img/
             return f'[{match.group(1)}]({match.group(3)})'
 
-        # 替换所有符合条件的图片插入语句
-        return re.sub(img_insert_pattern, replace_img_path, text)
+        def replace_html_img_src(match):
+            # 仅保留文件名，移除 img/
+            return f'<img src="{match.group(1)}"'
+
+        # 替换 Markdown 图片链接中的 img/
+        text = re.sub(img_insert_pattern, replace_img_path, text)
+        # 替换 HTML <img> 标签中的 img/
+        text = re.sub(html_img_tag_pattern, replace_html_img_src, text)
+        return text
 
     modified_content = avoid_process_code_blocks(content, process_non_code)
     return modified_content
