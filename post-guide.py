@@ -562,6 +562,29 @@ if __name__ == "__main__":
     -sp 或 -ps：先调用 preview_hexo 函数，再调用 start_hexo_server 函数；
     -rps 或 -rsp：先调用 refresh_hexo 函数，再调用 preview_hexo 函数，最后调用 start_hexo_server 函数；
     -d：调用 deploy_hexo 函数，用于部署。
+
+    When executed without any parameters, 
+    it reserves functionality for a potential GUI interface 
+    in the future and currently displays help information.
+
+    When parameters are provided, 
+    it supports command-line execution with the following commands:
+    -n: Calls the new_draft function to create a new 
+        article draft and move it to the _drafts directory.
+    -f: Calls the finalize_all_drafts function to 
+        adjust articles in the _drafts directory 
+        and move them into the source folder.
+    -r: Calls the refresh_hexo function to regenerate static files.
+    -s: Calls the start_hexo_server function to start the Hexo server.
+    -p: Calls the preview_hexo function to open the preview webpage.
+    -rs: First calls the refresh_hexo function, 
+        then calls the start_hexo_server function.
+    -sp or -ps: First calls the preview_hexo function, 
+        then calls the start_hexo_server function.
+    -rps or -rsp: First calls the refresh_hexo function, 
+        then calls the preview_hexo function, 
+        and finally calls the start_hexo_server function.
+    -d: Calls the deploy_hexo function to deploy.
     """
     import argparse
 
