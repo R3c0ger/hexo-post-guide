@@ -108,8 +108,8 @@ def check_get_make_dirs() -> tuple[Path, Path, Path, Path]:
 
 def change_front_matter(target_dir, filename, title):
     """
-    修改 md 文件中 Front-matter 里的 title 和 cover 字段的值
-    Modify the value of the title and cover fields in the Front-matter of the md file
+    修改 md 文件中 Front matter 里的 title 和 cover 字段的值
+    Modify the value of the title and cover fields in the Front matter of the md file
 
     其中，title 字段使用 title 值
     cover 字段为 yyyy/mm/filename/cover.jpg 路径，使用 date 字段中的年月来填充其值中的 yyyy/mm
@@ -128,7 +128,7 @@ def change_front_matter(target_dir, filename, title):
         front_matter_end_index = lines.index('---\n', 1) if '---\n' in lines[1:] else None
 
         if front_matter_end_index is None:
-            raise ValueError("Invalid Front-matter format.")
+            raise ValueError("Invalid Front matter format.")
 
         front_matter = ''.join(lines[:front_matter_end_index + 1])
         content = ''.join(lines[front_matter_end_index + 1:])
@@ -136,7 +136,7 @@ def change_front_matter(target_dir, filename, title):
         # 解析 date 字段
         date_match = re.search(r'date:\s*(\d{4}-\d{2}-\d{2})', front_matter)
         if not date_match:
-            raise ValueError("Date field not found in Front-matter.")
+            raise ValueError("Date field not found in Front matter.")
         date_str = date_match.group(1)
         date_obj = datetime.strptime(date_str, '%Y-%m-%d')
         yyyy_mm = date_obj.strftime('%Y/%m')
@@ -164,7 +164,9 @@ def new_draft(title: str):
     4. 调用 hexo_cmd 函数，使用 hexo new post 命令创建一个新文章
     5. 将新文章移动到 _draft 目录下的同名文件夹中
     6. 删除 source/_posts 下的源文件和同名文件夹
-    7. 将 md 文件中 Front-matter 里的 title 字段的值修改为 title, 补全 cover 字段的路径
+    7. 将 md 文件中 Front matter 里的 title 字段的值修改为 title, 补全 cover 字段的路径
+    8. 在 Front matter 后空一行，输入一个井号和空格，预留给一级标题
+    9. 在新文章的文件夹下创建 img 文件夹，用于存放图片
 
     Steps:
     1. Get and create the required directories
@@ -174,8 +176,11 @@ def new_draft(title: str):
     4. Call the hexo_cmd func to create new article using the hexo new post command
     5. Move the new article to the folder with the same name in the _draft dir
     6. Delete the source file and folder with the same name under source/_posts
-    7. Modify the value of the title field in the Front-matter of the md file to title,
+    7. Modify the value of the title field in the Front matter of the md file to title,
        and complete the path of the cover field
+    8. Leave a blank line after the Front matter, enter a hash symbol and a space,
+       reserved for the first-level title
+    9. Create an img folder under the new article folder to store images
 
     Args:
         title: 草稿标题 The title of the draft
@@ -207,8 +212,16 @@ def new_draft(title: str):
     if post_dir.exists():
         shutil.rmtree(post_dir)
 
-    # 7. 修改 md 文件中 Front-matter 里的 title 和 cover 字段的值
+    # 7. 修改 md 文件中 Front matter 里的 title 和 cover 字段的值
     change_front_matter(target_dir, filename, title)
+
+    # 8. 在 Front matter 后空一行，输入一个井号和空格，预留给一级标题
+    with open(target_dir / f'{filename}.md', 'a', encoding='utf-8') as f:
+        f.write('\n# ')
+
+    # 9. 在新文章的文件夹下创建 img 文件夹
+    img_dir = target_dir / 'img'
+    img_dir.mkdir(exist_ok=True)
 
     print(f"Draft '{blue(title)}' has been created and moved to {green(target_dir)}.")
 
