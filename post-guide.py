@@ -562,6 +562,14 @@ def deploy_hexo():
     exec_hexo_cmds('d')
 
 
+def update_dependencies_from_pkgjson():
+    """
+    根据 package.json 更新依赖
+    Update dependencies based on package.json
+    """
+    os.system('npm install')
+
+
 if __name__ == "__main__":
     """
     当没有附带任何参数运行时，为以后可能的 GUI 界面保留，目前展示帮助；
@@ -574,7 +582,8 @@ if __name__ == "__main__":
     -rs：先调用 refresh_hexo 函数，再调用 start_hexo_server 函数；
     -sp 或 -ps：先调用 preview_hexo 函数，再调用 start_hexo_server 函数；
     -rps 或 -rsp：先调用 refresh_hexo 函数，再调用 preview_hexo 函数，最后调用 start_hexo_server 函数；
-    -d：调用 deploy_hexo 函数，用于部署。
+    -d：调用 deploy_hexo 函数，用于部署；
+    -u：调用 update_dependencies_from_pkgjson 函数，用于根据 package.json 更新依赖。
 
     When executed without any parameters, 
     it reserves functionality for a potential GUI interface 
@@ -598,6 +607,8 @@ if __name__ == "__main__":
         then calls the preview_hexo function, 
         and finally calls the start_hexo_server function.
     -d: Calls the deploy_hexo function to deploy.
+    -u: Calls the update_dependencies_from_pkgjson function
+        to update dependencies based on package.json.
     """
     import argparse
 
@@ -645,6 +656,10 @@ if __name__ == "__main__":
     action_group.add_argument(
         '-d', '--deploy', action='store_true', help='Deploy the blog (hexo deploy)'
     )
+    action_group.add_argument(
+        '-u', '--update', action='store_true', 
+        help='Update dependencies based on package.json (npm install)'
+    )
 
     # 解析命令行参数
     args = parser.parse_args()
@@ -677,3 +692,5 @@ if __name__ == "__main__":
             start_hexo_server()
         elif args.deploy:
             deploy_hexo()
+        elif args.update:
+            update_dependencies_from_pkgjson()

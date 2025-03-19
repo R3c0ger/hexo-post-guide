@@ -29,6 +29,7 @@ optional arguments:
   -rsp, --refresh_start_preview
                         Refresh, preview and start server (hexo clean && hexo g && start http://localhost:4000 && hexo s)
   -d, --deploy          Deploy the blog (hexo deploy)
+  -u, --update          Update dependencies based on package.json (npm install)
 ```
 
 ## Installation
