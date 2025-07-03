@@ -143,7 +143,7 @@ def change_front_matter(target_dir, filename, title):
 
         # 更新 title 和 cover 字段
         front_matter = re.sub(r'title:\s*.*', f'title: {title}', front_matter)
-        front_matter = re.sub(r'cover:\s*.*', f'cover: {yyyy_mm}/{filename}/cover.jpg', front_matter)
+        front_matter = re.sub(r'cover:\s*.*', f'cover: {yyyy_mm}/{filename}/cover.png', front_matter)
 
         # 写入修改后的内容
         f.seek(0)
@@ -214,10 +214,15 @@ def new_draft(title: str):
 
     # 7. 修改 md 文件中 Front matter 里的 title 和 cover 字段的值
     change_front_matter(target_dir, filename, title)
-
-    # 8. 在 Front matter 后空一行，输入一个井号和空格，预留给一级标题
+    
+    # 8. 在 Front matter 后空一行，输入一个井号和空格，预留给一级标题；并添加彩蛋部分
     with open(target_dir / f'{filename}.md', 'a', encoding='utf-8') as f:
-        f.write('\n# ')
+        f.write('\n# \n\n\n\n')
+        f.write('## 彩蛋\n\n')
+        f.write('![](img/cover.png)\n\n')
+        f.write('- 彩蛋图片：\n')
+        f.write('  - 作者： twi@，pid：\n')
+        f.write('  - 来源：pixiv ID: \n')
 
     # 9. 在新文章的文件夹下创建 img 文件夹
     img_dir = target_dir / 'img'
