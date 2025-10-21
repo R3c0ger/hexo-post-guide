@@ -75,7 +75,7 @@ def exec_hexo_cmds(cmds: Union[list[str], str]):
     """
     if isinstance(cmds, str):
         cmds = [cmds]
-    hexo_path = 'hexo'
+    hexo_path = 'npx hexo'
     for cmd in cmds:
         full_cmd = f'{hexo_path} {cmd}'
         print(blue("\nExecuting:"), f"{full_cmd}")
